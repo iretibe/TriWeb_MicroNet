@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MicroNet.Sundry.Application\MicroNet.Sundry.Application.csproj" />
+    <ProjectReference Include="..\MicroNet.Sundry.Core\MicroNet.Sundry.Core.csproj" />
+    <ProjectReference Include="..\MicroNet.Sundry.Infrastructure\MicroNet.Sundry.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

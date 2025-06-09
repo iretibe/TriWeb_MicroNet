@@ -1,0 +1,25 @@
+﻿CREATE TABLE [loan].[LoanRequests] (
+    [Id]                  UNIQUEIDENTIFIER NOT NULL,
+    [AccountNumber]       NVARCHAR (MAX)   NOT NULL,
+    [ClientName]          NVARCHAR (MAX)   NOT NULL,
+    [Branch]              NVARCHAR (MAX)   NOT NULL,
+    [LoanType]            NVARCHAR (MAX)   NOT NULL,
+    [InterestRate]        DECIMAL (18, 2)  NOT NULL,
+    [RepaymentPeriod]     INT              NOT NULL,
+    [MaximumAmount]       DECIMAL (18, 2)  NOT NULL,
+    [RequestedPrincipal]  DECIMAL (18, 2)  NOT NULL,
+    [RiskMargin]          DECIMAL (18, 2)  NOT NULL,
+    [InsuranceAmount]     DECIMAL (18, 2)  NOT NULL,
+    [DisbursementMedium]  NVARCHAR (MAX)   NOT NULL,
+    [Status]              INT              NOT NULL,
+    [ReviewerComment]     NVARCHAR (MAX)   NULL,
+    [AuditInfo_CreatedBy] NVARCHAR (MAX)   NULL,
+    [AuditInfo_CreatedAt] DATETIME2 (7)    NULL,
+    [AuditInfo_UpdatedBy] NVARCHAR (MAX)   NULL,
+    [AuditInfo_UpdatedAt] DATETIME2 (7)    NULL,
+    [AuditInfo_DeletedBy] NVARCHAR (MAX)   NULL,
+    [AuditInfo_DeletedAt] DATETIME2 (7)    NULL,
+    [Version]             INT              NOT NULL,
+    CONSTRAINT [PK_LoanRequests] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+

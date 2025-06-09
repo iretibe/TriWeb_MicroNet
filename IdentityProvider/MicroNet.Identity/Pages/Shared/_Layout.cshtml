@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="~/assets/img/favicon.ico" type="image/x-icon" />
+    <title>MicroNet</title>
+
+    <!-- Required CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap">
+    <link rel="stylesheet" href="~/assets/css/style.css">
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="auth-container">
+        <div class="card">
+            @RenderBody()
+        </div>
+    </div>
+
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        void (function () {
+            document.querySelectorAll('.needs-validation').forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                })
+            })
+        })()
+    </script>
+
+    <script>
+        setTimeout(function () {
+            window.location.href = '/Account/Login'; // Redirect to login page after session expiry
+        }, 3600000); // 60 minutes in milliseconds
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\MicroNet.Shared\MicroNet.Shared.csproj" />
+    <ProjectReference Include="..\MicroNet.Revenue.Core\MicroNet.Revenue.Core.csproj" />
+    <ProjectReference Include="..\MicroNet.Revenue.Infrastructure\MicroNet.Revenue.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Events\" />
+    <Folder Include="Handlers\Events\" />
+    <Folder Include="Helpers\" />
+  </ItemGroup>
+
+</Project>

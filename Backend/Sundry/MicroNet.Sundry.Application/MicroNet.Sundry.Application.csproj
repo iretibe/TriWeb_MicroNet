@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\MicroNet.Shared\MicroNet.Shared.csproj" />
+    <ProjectReference Include="..\MicroNet.Sundry.Core\MicroNet.Sundry.Core.csproj" />
+    <ProjectReference Include="..\MicroNet.Sundry.Infrastructure\MicroNet.Sundry.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

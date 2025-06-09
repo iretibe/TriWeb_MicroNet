@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "MicroNet.Shared";
+
+package auditlog;
+
+service AuditLogService {
+  rpc CreateAuditLog (CreateAuditLogRequest) returns (CreateAuditLogResponse);
+}
+
+message CreateAuditLogRequest {
+  string user_id = 1;
+  string action = 2;
+  string data = 3;
+  string method = 4;
+  string entity_type = 5;
+}
+
+message CreateAuditLogResponse {
+  bool success = 1;
+  string message = 2;
+}

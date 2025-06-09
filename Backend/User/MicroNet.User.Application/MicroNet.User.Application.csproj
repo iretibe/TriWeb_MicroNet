@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\MicroNet.Shared\MicroNet.Shared.csproj" />
+    <ProjectReference Include="..\MicroNet.User.Core\MicroNet.User.Core.csproj" />
+    <ProjectReference Include="..\MicroNet.User.Infrastructure\MicroNet.User.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Exceptions\Menu\" />
+  </ItemGroup>
+
+</Project>

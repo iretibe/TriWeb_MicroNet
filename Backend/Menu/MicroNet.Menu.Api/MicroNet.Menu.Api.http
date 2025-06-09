@@ -1,0 +1,6 @@
+@MicroNet.Menu.Api_HostAddress = http://localhost:5240
+
+GET {{MicroNet.Menu.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
