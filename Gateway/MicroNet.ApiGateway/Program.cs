@@ -29,7 +29,7 @@ namespace MicroNet.ApiGateway
                 {
                     builderContext.AddRequestTransform(async transformContext =>
                     {
-                        var accessToken = transformContext.HttpContext.GetTokenAsync("access_token").Result;
+                        var accessToken = await transformContext.HttpContext.GetTokenAsync("access_token");
                         if (!string.IsNullOrEmpty(accessToken))
                         {
                             transformContext.ProxyRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
