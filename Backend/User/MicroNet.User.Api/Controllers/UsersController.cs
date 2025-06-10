@@ -2,8 +2,10 @@
 using MicroNet.User.Application.Commands.User;
 using MicroNet.User.Application.Queries.User;
 using MicroNet.User.Core.Dto.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Security.Claims;
 
 namespace MicroNet.User.Api.Controllers
 {
@@ -38,9 +40,9 @@ namespace MicroNet.User.Api.Controllers
         [ProducesResponseType(typeof(UserDto), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserCommand command)
         {
-            //var UsrId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            //command.CreateBy = Guid.Parse(UsrId!);
-            command.CreateBy = Guid.Parse("1A9C243D-1228-4B83-AC01-D41BB8CC5541");
+            var UsrId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            command.CreateBy = Guid.Parse(UsrId!);
+            //command.CreateBy = Guid.Parse("1A9C243D-1228-4B83-AC01-D41BB8CC5541");
             var result = await _dispatcher.SendAsync(command);
             return Ok(result);
         }

@@ -19,7 +19,7 @@ namespace MicroNet.User.Infrastructure.Configurations
             builder.Property(x => x.AuditDate).IsRequired();
             builder.Property(x => x.UserId).IsRequired().HasMaxLength(100);
             builder.Property(x => x.Data).IsRequired();
-            builder.Property(x => x.Method).IsRequired().HasMaxLength(10);
+            builder.Property(x => x.Method).IsRequired().HasMaxLength(50);
             builder.Property(x => x.EntityType).IsRequired().HasMaxLength(100);
         }
     }

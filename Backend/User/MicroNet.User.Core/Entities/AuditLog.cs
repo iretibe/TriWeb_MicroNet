@@ -17,6 +17,7 @@ namespace MicroNet.User.Core.Entities
 
         public AuditLog(string userId, string data, string method, string entityType)
         {
+            Id = Guid.NewGuid();
             AuditDate = DateTime.UtcNow;
             UserId = userId;
             Data = data;

@@ -65,7 +65,8 @@ namespace MicroNet.User.Application.Handlers.Commands.User
                 CreateDate = DateTime.UtcNow,
                 CreateBy = request.CreateBy,
                 Status = false,
-                //IsSystemAdmin = request.IsSystemAdmin
+                Code = "ABC",
+                IsSystemAdmin = request.IsSystemAdmin
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
