@@ -59,6 +59,8 @@ builder.Services.AddSingleton<IMessageBroker, RabbitMQMessageBroker>();
 
 builder.Services.AddScoped<IDomainEventLogger, DomainEventLogger>();
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddControllers();
 
 List<string> urlList = builder.Configuration.GetSection("WebClients:Links").Get<List<string>>()!;
@@ -192,10 +194,16 @@ else
 }
 
 var consultClient = app.Services.GetRequiredService<IConsulClient>();
+
 var registry = new ConsulServiceRegistry(
-    consultClient, builder.Configuration["consul:ServiceName"]!,
+    consultClient, 
+    builder.Configuration["consul:ServiceName"]!,
     builder.Configuration["consul:Host"]!, 
     Convert.ToInt32(builder.Configuration["consul:Port"]));
+
+// Register the service on startup
+await registry.RegisterAsync();
+
 app.Lifetime.ApplicationStopping.Register((() =>
 {
     registry.DeregisterAsync().GetAwaiter().GetResult();
@@ -226,4 +234,4 @@ app.MapGet("/health", () => Results.Ok("Healthy"));
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

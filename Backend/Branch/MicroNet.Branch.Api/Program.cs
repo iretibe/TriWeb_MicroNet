@@ -1,3 +1,4 @@
+using Consul;
 using MicroNet.Branch.Api.Branches.CreateBranch;
 using MicroNet.Branch.Api.Branches.DeleteBranch;
 using MicroNet.Branch.Api.Branches.GetAllBranches;
@@ -12,6 +13,7 @@ using MicroNet.Branch.Api.BranchTerminationRules.UpdateBranchTerminationRule;
 using MicroNet.Branch.Api.Data;
 using MicroNet.Branch.Api.Repositories;
 using MicroNet.Shared;
+using MicroNet.Shared.Consul.ServiceDiscovery;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -47,6 +49,11 @@ builder.Services
     .AddInMemoryQueryDispatcher()
     .AddEventHandlers()
     .AddInMemoryEventDispatcher();
+
+// Consul Implementation
+builder.Services.AddConsulServiceDiscovery(builder.Configuration["consul:Address"]!);
+
+builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 
@@ -161,6 +168,22 @@ else
     app.MapOpenApi();
 }
 
+var consultClient = app.Services.GetRequiredService<IConsulClient>();
+
+var registry = new ConsulServiceRegistry(
+    consultClient,
+    builder.Configuration["consul:ServiceName"]!,
+    builder.Configuration["consul:Host"]!,
+    Convert.ToInt32(builder.Configuration["consul:Port"]));
+
+// Register the service on startup
+await registry.RegisterAsync();
+
+app.Lifetime.ApplicationStopping.Register((() =>
+{
+    registry.DeregisterAsync().GetAwaiter().GetResult();
+}));
+
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
@@ -168,6 +191,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/health", () => Results.Ok("Healthy"));
+
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

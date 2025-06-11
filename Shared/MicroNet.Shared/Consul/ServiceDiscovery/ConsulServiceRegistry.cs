@@ -7,13 +7,14 @@ namespace MicroNet.Shared.Consul.ServiceDiscovery
     {
         private readonly IConsulClient _consulClient;
         private readonly string _serviceId;
+        private readonly AgentServiceRegistration _registration;
 
         public ConsulServiceRegistry(IConsulClient consulClient, string serviceName, string address, int port)
         {
             _consulClient = consulClient;
             _serviceId = $"{serviceName}-{Guid.NewGuid()}";
 
-            var registration = new AgentServiceRegistration
+            _registration = new AgentServiceRegistration
             {
                 ID = _serviceId,
                 Name = serviceName,
@@ -22,14 +23,17 @@ namespace MicroNet.Shared.Consul.ServiceDiscovery
                 Tags = new[] { serviceName },
                 Check = new AgentServiceCheck
                 {
-                    HTTP = $"http://{address}:{port}/health",
+                    HTTP = $"https://{address}:{port}/health",
                     Interval = TimeSpan.FromSeconds(10),
                     Timeout = TimeSpan.FromSeconds(5),
                     DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1)
                 }
             };
+        }
 
-            _consulClient.Agent.ServiceRegister(registration).GetAwaiter().GetResult();
+        public async Task RegisterAsync()
+        {
+            await _consulClient.Agent.ServiceRegister(_registration);
         }
 
         public async Task DeregisterAsync()

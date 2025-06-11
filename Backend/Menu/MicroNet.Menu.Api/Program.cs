@@ -1,3 +1,4 @@
+using Consul;
 using MicroNet.Menu.Api.Data;
 using MicroNet.Menu.Api.Menus.CreateMenu;
 using MicroNet.Menu.Api.Menus.DeleteMenu;
@@ -8,6 +9,8 @@ using MicroNet.Menu.Api.Menus.GetMenusById;
 using MicroNet.Menu.Api.Menus.UpdateMenu;
 using MicroNet.Menu.Api.Repositories;
 using MicroNet.Menu.Api.Services;
+using MicroNet.Shared;
+using MicroNet.Shared.Consul.ServiceDiscovery;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -28,6 +31,11 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetMe
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateMenuCommand).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DeleteMenuCommand).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateMenuCommand).Assembly));
+
+// Consul Implementation
+builder.Services.AddConsulServiceDiscovery(builder.Configuration["consul:Address"]!);
+
+builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 
@@ -151,6 +159,22 @@ else
     app.MapOpenApi();
 }
 
+var consultClient = app.Services.GetRequiredService<IConsulClient>();
+
+var registry = new ConsulServiceRegistry(
+    consultClient,
+    builder.Configuration["consul:ServiceName"]!,
+    builder.Configuration["consul:Host"]!,
+    Convert.ToInt32(builder.Configuration["consul:Port"]));
+
+// Register the service on startup
+await registry.RegisterAsync();
+
+app.Lifetime.ApplicationStopping.Register((() =>
+{
+    registry.DeregisterAsync().GetAwaiter().GetResult();
+}));
+
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
@@ -166,6 +190,8 @@ app.MapDeleteMenuEndpoint();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/health", () => Results.Ok("Healthy"));
+
 app.MapControllers();
 
 //InitializeDatabase(app);
@@ -179,4 +205,4 @@ app.MapControllers();
 //    }
 //}
 
-app.Run();
+await app.RunAsync();

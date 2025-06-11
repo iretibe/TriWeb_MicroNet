@@ -1,8 +1,11 @@
+using Consul;
 using MicroNet.Product.Application;
 using MicroNet.Product.Core.Clients;
 using MicroNet.Product.Infrastructure;
 using MicroNet.Product.Infrastructure.Clients;
 using MicroNet.Product.Infrastructure.Data;
+using MicroNet.Shared;
+using MicroNet.Shared.Consul.ServiceDiscovery;
 using MicroNet.Shared.CQRS.Dispatchers;
 using MicroNet.Shared.CQRS.Events;
 using MicroNet.Shared.Messaging.RabbitMq;
@@ -42,7 +45,13 @@ builder.Services.AddScoped<IAuditLogServiceClient, AuditLogServiceClient>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+// Consul Implementation
+builder.Services.AddConsulServiceDiscovery(builder.Configuration["consul:Address"]!);
+
+builder.Services.AddHealthChecks();
+
 builder.Services.AddControllers();
+
 List<string> urlList = builder.Configuration.GetSection("WebClients:Links").Get<List<string>>()!;
 string[] clientUrls = urlList!.Select(i => i.ToString()).ToArray();
 builder.Services.AddCors(options =>
@@ -148,6 +157,22 @@ else
     app.MapOpenApi();
 }
 
+var consultClient = app.Services.GetRequiredService<IConsulClient>();
+
+var registry = new ConsulServiceRegistry(
+    consultClient,
+    builder.Configuration["consul:ServiceName"]!,
+    builder.Configuration["consul:Host"]!,
+    Convert.ToInt32(builder.Configuration["consul:Port"]));
+
+// Register the service on startup
+await registry.RegisterAsync();
+
+app.Lifetime.ApplicationStopping.Register((() =>
+{
+    registry.DeregisterAsync().GetAwaiter().GetResult();
+}));
+
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
@@ -155,6 +180,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/health", () => Results.Ok("Healthy"));
+
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

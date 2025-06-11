@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\MicroNet.Shared\MicroNet.Shared.csproj" />
     <ProjectReference Include="..\MicroNet.Device.Core\MicroNet.Device.Core.csproj" />
   </ItemGroup>
 

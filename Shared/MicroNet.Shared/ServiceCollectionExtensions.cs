@@ -85,7 +85,7 @@ namespace MicroNet.Shared
         {
             services.AddSingleton<IConsulClient>(sp => new ConsulClient(config =>
             {
-                config.Address = new Uri("consulAddress");
+                config.Address = new Uri(consulAddress);
             }));
 
             services.AddSingleton<ConsulServiceLocator>();
