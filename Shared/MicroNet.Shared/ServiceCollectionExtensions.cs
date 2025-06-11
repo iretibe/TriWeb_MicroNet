@@ -1,4 +1,6 @@
-﻿using MicroNet.Shared.CQRS.Dispatchers;
+﻿using Consul;
+using MicroNet.Shared.Consul.ServiceDiscovery;
+using MicroNet.Shared.CQRS.Dispatchers;
 using MicroNet.Shared.CQRS.Dispatchers.Commands;
 using MicroNet.Shared.CQRS.Dispatchers.Events;
 using MicroNet.Shared.CQRS.Dispatchers.Queries;
@@ -67,7 +69,7 @@ namespace MicroNet.Shared
         {
             services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
             services.AddSingleton<IEventDispatcher, RabbitMqEventDispatcher>();
-            
+
             return services;
         }
 
@@ -75,6 +77,18 @@ namespace MicroNet.Shared
         {
             services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
             services.AddSingleton<IMessageBroker, RabbitMQMessageBroker>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddConsulServiceDiscovery(this IServiceCollection services, string consulAddress)
+        {
+            services.AddSingleton<IConsulClient>(sp => new ConsulClient(config =>
+            {
+                config.Address = new Uri("consulAddress");
+            }));
+
+            services.AddSingleton<ConsulServiceLocator>();
 
             return services;
         }

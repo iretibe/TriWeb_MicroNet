@@ -1,3 +1,6 @@
+using Consul;
+using MicroNet.Shared;
+using MicroNet.Shared.Consul.ServiceDiscovery;
 using MicroNet.Shared.CQRS.Dispatchers;
 using MicroNet.Shared.CQRS.Events;
 using MicroNet.Shared.Messaging.RabbitMq;
@@ -153,6 +156,9 @@ builder.Services
     .AddScoped<MenuServiceClient>()
     .AddScoped<BranchServiceClient>();
 
+// Consul Implementation
+builder.Services.AddConsulServiceDiscovery(builder.Configuration["consul:Address"]!);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -185,6 +191,16 @@ else
     app.MapOpenApi();
 }
 
+var consultClient = app.Services.GetRequiredService<IConsulClient>();
+var registry = new ConsulServiceRegistry(
+    consultClient, builder.Configuration["consul:ServiceName"]!,
+    builder.Configuration["consul:Host"]!, 
+    Convert.ToInt32(builder.Configuration["consul:Port"]));
+app.Lifetime.ApplicationStopping.Register((() =>
+{
+    registry.DeregisterAsync().GetAwaiter().GetResult();
+}));
+
 app.UseCors("CorsPolicy");
 
 app.UseStaticFiles();
@@ -205,6 +221,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/health", () => Results.Ok("Healthy"));
 
 app.MapControllers();
 
