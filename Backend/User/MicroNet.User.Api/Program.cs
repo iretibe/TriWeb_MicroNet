@@ -158,8 +158,11 @@ builder.Services
     .AddScoped<MenuServiceClient>()
     .AddScoped<BranchServiceClient>();
 
-// Consul Implementation
-builder.Services.AddConsulServiceDiscovery(builder.Configuration["consul:Address"]!);
+//// Consul Implementation
+//builder.Services.AddConsulServiceDiscovery(builder.Configuration["consul:Address"]!);
+
+// Consul & Fabio Registration
+builder.Services.AddConsulFabio(builder.Configuration);
 
 var app = builder.Build();
 
@@ -193,13 +196,16 @@ else
     app.MapOpenApi();
 }
 
-var consultClient = app.Services.GetRequiredService<IConsulClient>();
+//var consultClient = app.Services.GetRequiredService<IConsulClient>();
 
-var registry = new ConsulServiceRegistry(
-    consultClient, 
-    builder.Configuration["consul:ServiceName"]!,
-    builder.Configuration["consul:Host"]!, 
-    Convert.ToInt32(builder.Configuration["consul:Port"]));
+//var registry = new ConsulServiceRegistry(
+//    consultClient, 
+//    builder.Configuration["consul:ServiceName"]!,
+//    builder.Configuration["consul:Host"]!, 
+//    Convert.ToInt32(builder.Configuration["consul:Port"]));
+
+// Register service with Consul + Fabio tag
+var registry = new ConsulServiceRegistry(builder.Configuration);
 
 // Register the service on startup
 await registry.RegisterAsync();
@@ -233,5 +239,8 @@ app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok("Healthy"));
 
 app.MapControllers();
+
+// Register service in Consul/Fabio
+await app.UseConsulFabio(builder.Configuration, app.Lifetime);
 
 await app.RunAsync();

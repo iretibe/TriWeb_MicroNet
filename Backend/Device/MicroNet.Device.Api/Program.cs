@@ -143,13 +143,16 @@ else
     app.MapOpenApi();
 }
 
-var consultClient = app.Services.GetRequiredService<IConsulClient>();
+//var consultClient = app.Services.GetRequiredService<IConsulClient>();
 
-var registry = new ConsulServiceRegistry(
-    consultClient,
-    builder.Configuration["consul:ServiceName"]!,
-    builder.Configuration["consul:Host"]!,
-    Convert.ToInt32(builder.Configuration["consul:Port"]));
+//var registry = new ConsulServiceRegistry(
+//    consultClient,
+//    builder.Configuration["consul:ServiceName"]!,
+//    builder.Configuration["consul:Host"]!,
+//    Convert.ToInt32(builder.Configuration["consul:Port"]));
+
+// Register service with Consul + Fabio tag
+var registry = new ConsulServiceRegistry(builder.Configuration);
 
 // Register the service on startup
 await registry.RegisterAsync();

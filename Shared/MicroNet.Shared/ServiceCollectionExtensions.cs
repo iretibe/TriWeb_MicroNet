@@ -6,8 +6,10 @@ using MicroNet.Shared.CQRS.Dispatchers.Events;
 using MicroNet.Shared.CQRS.Dispatchers.Queries;
 using MicroNet.Shared.CQRS.Events;
 using MicroNet.Shared.Messaging.RabbitMq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Reflection;
 
 namespace MicroNet.Shared
@@ -91,6 +93,30 @@ namespace MicroNet.Shared
             services.AddSingleton<ConsulServiceLocator>();
 
             return services;
+        }
+
+        public static IServiceCollection AddConsulFabio(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton<IConsulClient, ConsulClient>(p =>
+            {
+                var address = configuration["consul:Address"] ?? "http://localhost:8500";
+                return new ConsulClient(cfg => cfg.Address = new Uri(address));
+            });
+
+            services.AddSingleton<ConsulServiceRegistry>();
+            return services;
+        }
+
+        public static async Task UseConsulFabio(this IApplicationBuilder app, IConfiguration configuration, IHostApplicationLifetime lifetime)
+        {
+            var registry = app.ApplicationServices.GetRequiredService<ConsulServiceRegistry>();
+            await registry.RegisterAsync();
+
+            lifetime.ApplicationStopping.Register(() =>
+            {
+                // Fire-and-forget de-registration on shutdown
+                Task.Run(() => registry.DeregisterAsync());
+            });
         }
     }
 }
