@@ -12,15 +12,18 @@ namespace MicroNet.Branch.Api.Controllers
     public class BranchesController : BaseController
     {
         private readonly IDispatcher _dispatcher;
+        private readonly ILogger<BranchesController> _logger;
 
-        public BranchesController(IDispatcher dispatcher)
+        public BranchesController(IDispatcher dispatcher, ILogger<BranchesController> logger)
         {
             _dispatcher = dispatcher;
+            _logger = logger;
         }
 
         [HttpGet("GetAllBranches")]
         public async Task<ActionResult<IEnumerable<BranchDto>>> GetAllBranches()
         {
+            _logger.LogInformation("Fetching all branches from the database.");
             var result = await _dispatcher.QueryAsync<GetAllBranchesQuery, IEnumerable<BranchDto>>(new GetAllBranchesQuery());
 
             return Ok(result);

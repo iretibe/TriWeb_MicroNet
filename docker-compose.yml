@@ -1,0 +1,122 @@
+services:
+  elasticsearch:
+    image: elastic/elasticsearch:8.13.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - elk-network
+
+  kibana:
+    image: elastic/kibana:8.13.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    networks:
+      - elk-network
+
+  micronet.user.db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: micronet.user.db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Micronet@2025$
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - elk-network
+
+  seq:
+    image: datalust/seq
+    container_name: seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:80"
+    volumes:
+      - seq-data:/data
+    networks:
+      - elk-network
+
+  consul:
+    image: consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: agent -dev -client=0.0.0.0
+    networks:
+      - elk-network
+
+  fabio:
+    image: fabiolb/fabio
+    container_name: fabio
+    ports:
+      - "9999:9999"    # UI
+      - "9998:9998"    # Admin
+      - "80:9999"
+    environment:
+      - registry_consul_addr=consul:8500
+      - registry_consul_register_name=fabio
+      - registry_consul_service_addr=:9999
+    depends_on:
+      - consul
+    networks:
+      - elk-network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - elk-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - elk-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # AMQP protocol
+      - "15672:15672"   # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=Micronet@2025$
+    networks:
+      - elk-network
+
+volumes:
+  elasticsearch_data:
+  sqlserver-data:
+  seq-data:
+
+networks:
+  elk-network:
+    driver: bridge

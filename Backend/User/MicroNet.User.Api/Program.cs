@@ -18,12 +18,51 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Polly;
+using Prometheus;
+using Serilog;
 using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Loggin with Serilog (Seq)
+Log.Logger = new LoggerConfiguration()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithThreadId()
+    .Enrich.WithProcessId()
+    .Enrich.FromLogContext()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.Seq(builder.Configuration["Observability:Seq"]!) // Seq default URL
+    .ReadFrom.Configuration(builder.Configuration) // Support configuration from appsettings.json
+    .CreateLogger();
+builder.Host.UseSerilog();
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource =>
+    {
+        resource.AddService("MicroNet.User.Api", serviceVersion: "1.0.0");
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddPrometheusExporter()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri(builder.Configuration["Observability:Jaeger"]!); // OTLP over gRPC
+                otlp.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+            });
+    });
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -240,7 +279,11 @@ app.MapGet("/health", () => Results.Ok("Healthy"));
 
 app.MapControllers();
 
+app.UseSerilogRequestLogging(); // Optional but useful for HTTP logs
+
 // Register service in Consul/Fabio
 await app.UseConsulFabio(builder.Configuration, app.Lifetime);
+
+//app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 await app.RunAsync();

@@ -8,6 +8,7 @@ using MicroNet.User.Application.Helpers;
 using MicroNet.User.Core.Entities;
 using MicroNet.User.Core.Logging;
 using MicroNet.User.Core.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace MicroNet.User.Application.Handlers.Commands.User
 {
@@ -17,14 +18,16 @@ namespace MicroNet.User.Application.Handlers.Commands.User
         private readonly IMessageBroker _messageBroker;
         private readonly IDomainEventLogger _logger;
         private readonly IAuditLogRepository _auditLogRepository;
+        private readonly ILogger<DeleteUserCommandHandler> _loggerService;
 
         public DeleteUserCommandHandler(IUserRepository repository, IMessageBroker messageBroker,
-            IDomainEventLogger logger, IAuditLogRepository auditLogRepository)
+            IDomainEventLogger logger, IAuditLogRepository auditLogRepository, ILogger<DeleteUserCommandHandler> loggerService)
         {
             _repository = repository;
             _messageBroker = messageBroker;
             _logger = logger;
             _auditLogRepository = auditLogRepository;
+            _loggerService = loggerService;
         }
 
         public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -61,6 +64,7 @@ namespace MicroNet.User.Application.Handlers.Commands.User
             );
             await _auditLogRepository.AddAuditLogAsync(auditTrail);
 
+            _loggerService.LogInformation("User deleted successfully with ID: {UserId}", request.Id);
             return Unit.Value;
         }
     }

@@ -1,52 +1,42 @@
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Net.Http.Headers;
-using Yarp.ReverseProxy.Transforms;
+using Yarp.ReverseProxy;
 
-namespace MicroNet.ApiGateway
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Load reverse proxy configuration from appsettings.json
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+// Configure JWT Bearer authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        public static void Main(string[] args)
+        var idpSettings = builder.Configuration.GetSection("MicroNetIdpSettings");
+
+        options.Authority = idpSettings["Authority"];
+        options.RequireHttpsMetadata = bool.Parse(idpSettings["RequireHttpsMetadata"] ?? "true");
+        options.Audience = idpSettings["ApiName"];
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            var builder = WebApplication.CreateBuilder(args);
+            ValidateIssuer = true,
+            ValidIssuer = idpSettings["IssuerUri"],
+            ValidateAudience = true,
+            ValidAudience = idpSettings["ApiName"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
 
-            builder.Services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
-                {
-                    options.Authority = builder.Configuration["MicroNetIdpSettings:Authority"];
-                    options.TokenValidationParameters = new TokenValidationParameters()
-                    {
-                        ValidateAudience = false
-                    };
-                });
+builder.Services.AddAuthorization();
 
-            builder.Services.AddAuthorization();
+var app = builder.Build();
 
-            builder.Services.AddReverseProxy()
-                .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
-                .AddTransforms(builderContext =>
-                {
-                    builderContext.AddRequestTransform(async transformContext =>
-                    {
-                        var accessToken = await transformContext.HttpContext.GetTokenAsync("access_token");
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            transformContext.ProxyRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                        }
-                    });
-                });
+app.UseHttpsRedirection();
 
-            var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+app.MapReverseProxy();
 
-            app.MapReverseProxy();
-
-            app.MapGet("/", () => "Hello World! Welcome to MicroNet API Gateway service").RequireAuthorization();
-
-            app.Run();
-        }
-    }
-}
+app.Run();

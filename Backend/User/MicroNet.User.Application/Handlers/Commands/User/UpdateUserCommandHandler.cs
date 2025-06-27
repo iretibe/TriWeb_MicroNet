@@ -9,6 +9,7 @@ using MicroNet.User.Application.Commands.User;
 using MicroNet.User.Core.Repositories;
 using MicroNet.User.Core.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace MicroNet.command.Application.Handlers.Commands.User
 {
@@ -19,16 +20,19 @@ namespace MicroNet.command.Application.Handlers.Commands.User
         private readonly IDomainEventLogger _logger;
         private readonly IConfiguration _configuration;
         private readonly IAuditLogRepository _auditLogRepository;
+        private readonly ILogger<UpdateUserCommandHandler> _loggerService;
 
         public UpdateUserCommandHandler(IUserRepository repository,
             IMessageBroker messageBroker, IDomainEventLogger logger,
-            IConfiguration configuration, IAuditLogRepository auditLogRepository)
+            IConfiguration configuration, IAuditLogRepository auditLogRepository,
+            ILogger<UpdateUserCommandHandler> loggerService)
         {
             _repository = repository;
             _messageBroker = messageBroker;
             _logger = logger;
             _configuration = configuration;
             _auditLogRepository = auditLogRepository;
+            _loggerService = loggerService;
         }
 
         public async Task<UserDto> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
@@ -94,6 +98,7 @@ namespace MicroNet.command.Application.Handlers.Commands.User
             );
             await _auditLogRepository.AddAuditLogAsync(auditTrail);
 
+            _loggerService.LogInformation("User updated successfully with ID: {UserId}", command.Id);
             return new UserDto
             {
                 Id = command.Id,

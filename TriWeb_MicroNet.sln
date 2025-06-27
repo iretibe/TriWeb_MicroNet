@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Users\Somad\Downloads\Virtual Architecture Diagram.png = ..\..\..\Users\Somad\Downloads\Virtual Architecture Diagram.png
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User", "User", "{44C2E62A-D50E-4888-AE74-B448F8BA7436}"
 EndProject
@@ -146,6 +149,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroNet.Sundry.Core", "Backend\Sundry\MicroNet.Sundry.Core\MicroNet.Sundry.Core.csproj", "{54C216AC-9AAC-4881-B678-71E6321485C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroNet.Sundry.Infrastructure", "Backend\Sundry\MicroNet.Sundry.Infrastructure\MicroNet.Sundry.Infrastructure.csproj", "{8C148F84-1D21-4CCB-B86C-6C5FACA5EB6A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Certs", "Certs", "{DEF97B85-29A2-4FF7-A37A-BAB49412D5BD}"
+	ProjectSection(SolutionItems) = preProject
+		Certs\micronetdevcert.pfx = Certs\micronetdevcert.pfx
+	EndProjectSection
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -363,6 +373,10 @@ Global
 		{8C148F84-1D21-4CCB-B86C-6C5FACA5EB6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C148F84-1D21-4CCB-B86C-6C5FACA5EB6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C148F84-1D21-4CCB-B86C-6C5FACA5EB6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

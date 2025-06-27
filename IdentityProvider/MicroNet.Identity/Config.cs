@@ -716,9 +716,7 @@ namespace MicroNet.Identity
                     PostLogoutRedirectUris = new []
                     {
                         "https://localhost:7154/signout-callback-oidc",
-                        "http://localhost/s2.micronet.gateway.api/signout-callback-oidc",
-                        "https://localhost:7154/swagger/signout-callback-oidc",
-                        "http://localhost/s2.micronet.gateway.api/swagger/signout-callback-oidc",
+                        "http://localhost/s2.micronet.gateway.api/signout-callback-oidc"
                     },
 					// Set token lifetimes
 					AccessTokenLifetime = 3600, // 1 hour

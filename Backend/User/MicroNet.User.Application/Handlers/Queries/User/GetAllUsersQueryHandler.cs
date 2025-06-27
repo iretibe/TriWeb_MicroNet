@@ -2,16 +2,19 @@
 using MicroNet.User.Application.Queries.User;
 using MicroNet.User.Core.Dto.User;
 using MicroNet.User.Core.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace MicroNet.User.Application.Handlers.Queries.User
 {
     public class GetAllUsersQueryHandler : IQueryHandler<GetAllUsersQuery, IEnumerable<UserRecordsDto>>
     {
         private readonly IUserRepository _repository;
+        private readonly ILogger<GetAllUsersQueryHandler> _logger;
 
-        public GetAllUsersQueryHandler(IUserRepository repository)
+        public GetAllUsersQueryHandler(IUserRepository repository, ILogger<GetAllUsersQueryHandler> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<UserRecordsDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
@@ -37,6 +40,7 @@ namespace MicroNet.User.Application.Handlers.Queries.User
                 RoleName = d.RoleName
             });
 
+            _logger.LogInformation("Retrieved {Count} users", result.Count());
             return result;
         }
     }

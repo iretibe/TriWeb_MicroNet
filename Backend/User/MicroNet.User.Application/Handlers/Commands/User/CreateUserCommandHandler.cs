@@ -11,6 +11,7 @@ using MicroNet.User.Core.Logging;
 using MicroNet.User.Core.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace MicroNet.User.Application.Handlers.Commands.User
 {
@@ -26,10 +27,12 @@ namespace MicroNet.User.Application.Handlers.Commands.User
         private readonly IEmailRepository _emailRepository;
         private readonly IConfiguration _configuration;
 
+        private readonly ILogger<CreateUserCommandHandler> _loggerService;
+
         public CreateUserCommandHandler(IUserRepository repository, IMessageBroker messageBroker, 
             IDomainEventLogger logger, IAuditLogRepository auditLogRepository, 
             UserManager<ApplicationUser> userManager, IEmailRepository emailRepository,
-            IConfiguration configuration)
+            IConfiguration configuration, ILogger<CreateUserCommandHandler> loggerService)
         {
             _repository = repository;
             _messageBroker = messageBroker;
@@ -38,6 +41,7 @@ namespace MicroNet.User.Application.Handlers.Commands.User
             _userManager = userManager;
             _emailRepository = emailRepository;
             _configuration = configuration;
+            _loggerService = loggerService;
         }
 
         public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -73,6 +77,7 @@ namespace MicroNet.User.Application.Handlers.Commands.User
 
             if (!result.Succeeded)
             {
+                _loggerService.LogError("User creation failed: {Errors}", result.Errors.ToString());
                 throw new UserCreationException(result.Errors.ToString()!);
             }
 
@@ -96,6 +101,7 @@ namespace MicroNet.User.Application.Handlers.Commands.User
                 "AspNetUsers"
             );
             await _auditLogRepository.AddAuditLogAsync(auditTrail);
+            _loggerService.LogInformation("User created successfully with ID: {UserId}", user.Id);
 
             //Publish using Message Broker
             await _messageBroker.PublishAsync(new UserCreatedEvent(user.Id, user.FullName, user.PhysicalAddress,
@@ -117,7 +123,9 @@ namespace MicroNet.User.Application.Handlers.Commands.User
                 Retries = 0,
                 LastAttemptedAt = DateTime.UtcNow
             });
+            _loggerService.LogInformation("UserCreatedEvent logged for User ID: {UserId}", user.Id);
 
+            _loggerService.LogInformation("UserDto created successfully for User ID: {UserId}", user.Id);
             return new UserDto
             {
                 UserName = request!.UserName,
